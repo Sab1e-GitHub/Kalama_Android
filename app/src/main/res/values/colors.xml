@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="DodgerBlue">#FF1E90FF</color>
+    <color name="MediumBlue">#FF0000CD</color>
+    <color name="DeepSkyBlue">#FF00BFFF</color>
+    <color name="RoyalBlue">#FF4169E1</color>
+    <color name="SkyBlue">#FF87CEEB</color>
+    <color name="LightGray">#FFEEEEEE</color>
+    <color name="OrangeMoney">#FFFF7F24</color>
+    <color name="Brown">#FFFF4040</color>
+    <color name="GhostWhite">#FFF6F6F8</color>
+    <color name="DarkGray">#FFDCDCDC</color>
+    <color name="Gray">#FFDCDCDC</color>
+    <color name="Green">#FF008B45</color>
+    <color name="DarkRed">#FFB22222</color>
+    <color name="transparent">#80000000</color>
+    <color name="LightBlack">#FF222222</color>
+</resources>

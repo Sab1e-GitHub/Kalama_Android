@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10sp">
+
+        <Button
+            android:id="@+id/btn_connect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:text="Connect" />
+
+        <TextView
+            android:id="@+id/tv_showFPS"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:text="FPS:0"
+            android:textSize="25sp" />
+    </RelativeLayout>
+
+    <cn.sab1e.kalama.SquareView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="0dp"
+        android:background="@color/black">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.camera.view.PreviewView
+                android:id="@+id/previewView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <cn.sab1e.kalama.HeatmapView
+                android:id="@+id/heatmapView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </RelativeLayout>
+
+    </cn.sab1e.kalama.SquareView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10sp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <!-- 最小温度文本 -->
+        <TextView
+            android:id="@+id/tv_colorStripMinTemp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:text="0℃"
+            android:textSize="18sp" />
+
+        <!-- 色条，居中显示并占据大部分空间 -->
+        <cn.sab1e.kalama.ColorStrip
+            android:id="@+id/cs_colorStrip"
+            android:layout_width="0dp"
+            android:layout_height="30sp"
+            android:layout_weight="1" />
+
+        <!-- 最大温度文本 -->
+        <TextView
+            android:id="@+id/tv_colorStripMaxTemp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="80℃"
+            android:textSize="18sp" />
+
+    </LinearLayout>
+
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="top|center"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:text="颜色模式" />
+
+                <Spinner
+                    android:id="@+id/sp_colorMode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    android:gravity="top|center"
+                    android:orientation="vertical">
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/sw_interpolateFramesMode"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="插帧模式" />
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/sw_cameraAssistMode"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="相机辅助模式" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    android:gravity="top|center">
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/sw_relativeTemperatureMode"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="相对温度模式" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_cameraSettings"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10sp"
+                android:gravity="center">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="热成像透明度"
+                    android:textSize="18sp" />
+
+                <SeekBar
+                    android:id="@+id/sb_thermographAlpha"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_absTempSettings"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="绝对温度范围设置"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/et_minTemperature"
+                    android:layout_width="50sp"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:inputType="numberSigned"
+                    android:text="0" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="℃~"
+                    android:textSize="24sp" />
+
+                <EditText
+                    android:id="@+id/et_maxTemperature"
+                    android:layout_width="50sp"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:inputType="numberSigned"
+                    android:text="80" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="℃"
+                    android:textSize="24sp" />
+            </LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:text="Kalama v1.0\nBy Sab1e"
+                android:layout_margin="10sp"/>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
