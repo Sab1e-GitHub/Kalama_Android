@@ -97,6 +97,8 @@ public class MainActivity extends AppCompatActivity {
         // 设置适配器给 Spinner
         sp_colorMode.setAdapter(adapter);
         Button btn_connect = findViewById(R.id.btn_connect);
+        Button btn_rotateThermograph = findViewById(R.id.btn_rotateThermograph);
+
 
         heatmapView = findViewById(R.id.heatmapView);
         tv_showFPS = findViewById(R.id.tv_showFPS);  // 获取 TextView
@@ -279,6 +281,17 @@ public class MainActivity extends AppCompatActivity {
                     userConfiguration.setCameraAssistMode(false);
                 }
 
+            }
+        });
+
+        btn_rotateThermograph.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(userConfiguration.getThermographRotation()<4) {
+                    userConfiguration.setThermographRotation(userConfiguration.getThermographRotation()+1);
+                }else{
+                    userConfiguration.setThermographRotation(0);
+                }
             }
         });
 

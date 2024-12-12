@@ -215,6 +215,13 @@
                     android:text="℃"
                     android:textSize="24sp" />
             </LinearLayout>
+            <Button
+                android:id="@+id/btn_rotateThermograph"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="图像向右旋转90°"
+                />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

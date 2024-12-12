@@ -29,10 +29,12 @@ public class HeatmapView extends View {
         paint.setTextAlign(Paint.Align.CENTER);  // 文本居中对齐
 
     }
-    public void setTextView(TextView tv_colorStripMinTemp,TextView tv_colorStripMaxTemp){
+
+    public void setTextView(TextView tv_colorStripMinTemp, TextView tv_colorStripMaxTemp) {
         this.tv_colorStripMinTemp = tv_colorStripMinTemp;
         this.tv_colorStripMaxTemp = tv_colorStripMaxTemp;
     }
+
     // 设置 FPS 更新监听器
     public void setOnFPSUpdateListener(OnFPSUpdateListener listener) {
         this.fpsUpdateListener = listener;
@@ -86,21 +88,25 @@ public class HeatmapView extends View {
             // 保存当前帧为下一帧做插值使用
             previousMatrix = interpolatedMatrix;
 
+            // 根据用户设置的旋转角度进行矩阵旋转
+            int rotation = getThermographRotation(); // 获取旋转角度
+            interpolatedMatrix = rotateMatrix(interpolatedMatrix, rotation);
+
             // 获取插值后的温度矩阵的最大值和最小值
             float[] minMax = new float[2];
             float minTemp = 0f;
             float maxTemp = 0f;
-            if(userConfiguration.isRelativeTemperatureMode()){
+            if (userConfiguration.isRelativeTemperatureMode()) {
                 getMinMaxTemperature(interpolatedMatrix, minMax);
                 minTemp = minMax[0];
                 maxTemp = minMax[1];
-            }else {
+            } else {
                 minTemp = userConfiguration.getAbsMinimumTemperature();
                 maxTemp = userConfiguration.getAbsMaximumTemperature();
             }
-            if(tv_colorStripMinTemp != null){
-                String minTempText = Math.round(minTemp) +"℃";
-                String maxTempText = Math.round(maxTemp) +"℃";
+            if (tv_colorStripMinTemp != null) {
+                String minTempText = Math.round(minTemp) + "℃";
+                String maxTempText = Math.round(maxTemp) + "℃";
                 tv_colorStripMinTemp.setText(minTempText);
                 tv_colorStripMaxTemp.setText(maxTempText);
             }
@@ -110,7 +116,7 @@ public class HeatmapView extends View {
                 for (int j = 0; j < targetWidth; j++) {
                     // 获取插值后的温度值
                     float temp = interpolatedMatrix[i][j];
-                    int color = ColorManager.getColor(context,temp, maxTemp, minTemp);
+                    int color = ColorManager.getColor(context, temp, maxTemp, minTemp);
                     paint.setColor(color);
                     // 绘制每个格子的矩形
                     float left = j * (getWidth() / targetWidth);
@@ -120,45 +126,46 @@ public class HeatmapView extends View {
                     canvas.drawRect(left, top, right, bottom, paint);
                 }
             }
-
-            // 计算中心点的坐标
-            int centerX = targetWidth / 2;
-            int centerY = targetHeight / 2;
-
-            // 获取中心点的温度值
-            float centerTemp = interpolatedMatrix[centerY][centerX];
-            int centerColor = ColorManager.getColor(context, centerTemp, maxTemp, minTemp);
-            int invertedColor = invertColor(centerColor);
-
-            // 设置绘制十字的颜色为反色
-            paint.setColor(invertedColor);
-            paint.setStrokeWidth(8);  // 设置十字线的宽度
-            // 计算十字的尺寸，线条长度为目标图像的宽度的一半
-            float lineLength = 45;
-
-            // 绘制十字形（水平线和垂直线）
-            canvas.drawLine(centerX * (getWidth() / targetWidth) - lineLength, centerY * (getHeight() / targetHeight),
-                    centerX * (getWidth() / targetWidth) + lineLength, centerY * (getHeight() / targetHeight), paint);
-            canvas.drawLine(centerX * (getWidth() / targetWidth), centerY * (getHeight() / targetHeight) - lineLength,
-                    centerX * (getWidth() / targetWidth), centerY * (getHeight() / targetHeight) + lineLength, paint);
-
-            // 获取十字右下位置的温度
-            float tempAtPointer = interpolatedMatrix[centerY + 1][centerX + 1];
-            int tempColor = ColorManager.getColor(context, tempAtPointer, maxTemp, minTemp);
-            int invertedTempColor = invertColor(tempColor);
-
-            // 设置文本颜色为反色
-            paint.setColor(invertedTempColor);
-            paint.setTextSize(60);  // 设置字体大小
-            String tempText = String.valueOf(Math.round(tempAtPointer)) + "℃";
-
-            // 绘制温度文本
-            float textX = (centerX + 1) * (getWidth() / targetWidth) + 60;  // 十字指针右下位置的X坐标
-            float textY = (centerY + 1) * (getHeight() / targetHeight) + 60; // 十字指针右下位置的Y坐标
-            canvas.drawText(tempText, textX, textY, paint);  // 绘制文本
         }
     }
 
+    // 矩阵旋转方法
+    private float[][] rotateMatrix(float[][] matrix, int rotation) {
+        int rows = matrix.length;
+        int cols = matrix[0].length;
+        float[][] rotatedMatrix;
+
+        switch (rotation) {
+            case 1: // 90度
+                rotatedMatrix = new float[cols][rows];
+                for (int i = 0; i < rows; i++) {
+                    for (int j = 0; j < cols; j++) {
+                        rotatedMatrix[j][rows - 1 - i] = matrix[i][j];
+                    }
+                }
+                break;
+            case 2: // 180度
+                rotatedMatrix = new float[rows][cols];
+                for (int i = 0; i < rows; i++) {
+                    for (int j = 0; j < cols; j++) {
+                        rotatedMatrix[rows - 1 - i][cols - 1 - j] = matrix[i][j];
+                    }
+                }
+                break;
+            case 3: // 270度
+                rotatedMatrix = new float[cols][rows];
+                for (int i = 0; i < rows; i++) {
+                    for (int j = 0; j < cols; j++) {
+                        rotatedMatrix[cols - 1 - j][i] = matrix[i][j];
+                    }
+                }
+                break;
+            default: // 0度，不旋转
+                rotatedMatrix = matrix;
+                break;
+        }
+        return rotatedMatrix;
+    }
 
     // 按照插值因子，对前后两帧进行插值
     private float[][] interpolateFrames(float[][] previous, float[][] current) {
@@ -200,5 +207,10 @@ public class HeatmapView extends View {
     private int invertColor(int color) {
         // 反转 RGB 值
         return Color.rgb(255 - Color.red(color), 255 - Color.green(color), 255 - Color.blue(color));
+    }
+
+    // 获取用户配置的旋转角度
+    private int getThermographRotation() {
+        return userConfiguration.getThermographRotation();
     }
 }

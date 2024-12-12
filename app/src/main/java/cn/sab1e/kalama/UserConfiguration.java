@@ -59,19 +59,20 @@ public class UserConfiguration {
     private float thermographAlpha = 1f;
     private String colorMode = "ROYGB";
     private Context context;
-    private StorageManager storageManager;
-
+    private final StorageManager storageManager;
+    private int thermographRotation = 0;
 
     private UserConfiguration(Context context) {
         try {
             storageManager = StorageManager.getInstance(context);
             isRelativeTemperatureMode = storageManager.getBoolean("isRelativeTemperatureMode", false);
             isInterpolateFramesMode = storageManager.getBoolean("isInterpolateFramesMode", false);
-            isCameraAssistMode = storageManager.getBoolean("isCameraAssistMode",isCameraAssistMode);
+            isCameraAssistMode = storageManager.getBoolean("isCameraAssistMode",true);
 
             absMaximumTemperature = storageManager.getFloat("absMaximumTemperature", 0f);
             absMinimumTemperature = storageManager.getFloat("absMinimumTemperature", 0f);
-            thermographAlpha = storageManager.getFloat("thermographAlpha",thermographAlpha);
+            thermographAlpha = storageManager.getFloat("thermographAlpha",0.8f);
+            thermographRotation = storageManager.getInt("thermographRotation",0);
 
             colorMode = storageManager.getString("colorMode", "ROYGB");
         } catch (Exception e) {
@@ -102,5 +103,14 @@ public class UserConfiguration {
     public void setThermographAlpha(float thermographAlpha) {
         this.thermographAlpha = thermographAlpha;
         storageManager.setFloat("thermographAlpha", thermographAlpha);
+    }
+
+    public int getThermographRotation() {
+        return thermographRotation;
+    }
+
+    public void setThermographRotation(int thermographRotation) {
+        this.thermographRotation = thermographRotation;
+        storageManager.setInt("thermographRotation", thermographRotation);
     }
 }
