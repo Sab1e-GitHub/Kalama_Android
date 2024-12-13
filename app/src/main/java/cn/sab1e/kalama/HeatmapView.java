@@ -58,12 +58,10 @@ public class HeatmapView extends View {
 
         long currentTime = System.nanoTime();
         if (lastUpdateTime != 0) {
-            // 计算每次绘制的时间间隔（以毫秒为单位）
-            long timeInterval = (currentTime - lastUpdateTime) / 1000000;  // 纳秒转为毫秒
-            if (timeInterval > 0) {  // 确保时间间隔大于 0
-                refreshRate = 1000f / timeInterval;  // 刷新率为每秒更新的次数
-                final int fpsInt = Math.round(refreshRate);  // 四舍五入为整数
-                // 通知 MainActivity 更新 FPS
+            long timeInterval = (currentTime - lastUpdateTime) / 1000000;
+            if (timeInterval > 0) {
+                refreshRate = 1000f / timeInterval;
+                final int fpsInt = Math.round(refreshRate);
                 if (fpsUpdateListener != null) {
                     fpsUpdateListener.onFPSUpdate(fpsInt);
                 }
@@ -72,30 +70,22 @@ public class HeatmapView extends View {
         lastUpdateTime = currentTime;
 
         if (thermographMatrix != null) {
-            // 计算目标图像的宽度和高度
             int targetWidth = 72;
             int targetHeight = 72;
 
-            // 使用双线性插值算法将温度矩阵插值到目标分辨率
             float[][] interpolatedMatrix = BilinearInterpolation.bilinearInterpolate(thermographMatrix, targetWidth, targetHeight);
 
-            // 判断是否启用图像插帧模式
             if (userConfiguration.isInterpolateFramesMode() && previousMatrix != null) {
-                // 插帧处理：如果有前一帧的数据，进行插帧操作
                 interpolatedMatrix = interpolateFrames(previousMatrix, interpolatedMatrix);
             }
-
-            // 保存当前帧为下一帧做插值使用
             previousMatrix = interpolatedMatrix;
 
-            // 根据用户设置的旋转角度进行矩阵旋转
-            int rotation = getThermographRotation(); // 获取旋转角度
+            // 根据用户配置获取旋转角度
+            int rotation = getThermographRotation();
             interpolatedMatrix = rotateMatrix(interpolatedMatrix, rotation);
 
-            // 获取插值后的温度矩阵的最大值和最小值
             float[] minMax = new float[2];
-            float minTemp = 0f;
-            float maxTemp = 0f;
+            float minTemp, maxTemp;
             if (userConfiguration.isRelativeTemperatureMode()) {
                 getMinMaxTemperature(interpolatedMatrix, minMax);
                 minTemp = minMax[0];
@@ -105,20 +95,16 @@ public class HeatmapView extends View {
                 maxTemp = userConfiguration.getAbsMaximumTemperature();
             }
             if (tv_colorStripMinTemp != null) {
-                String minTempText = Math.round(minTemp) + "℃";
-                String maxTempText = Math.round(maxTemp) + "℃";
-                tv_colorStripMinTemp.setText(minTempText);
-                tv_colorStripMaxTemp.setText(maxTempText);
+                tv_colorStripMinTemp.setText(Math.round(minTemp) + "℃");
+                tv_colorStripMaxTemp.setText(Math.round(maxTemp) + "℃");
             }
 
-            // 遍历插值后的矩阵，绘制每个格子
             for (int i = 0; i < targetHeight; i++) {
                 for (int j = 0; j < targetWidth; j++) {
-                    // 获取插值后的温度值
                     float temp = interpolatedMatrix[i][j];
                     int color = ColorManager.getColor(context, temp, maxTemp, minTemp);
                     paint.setColor(color);
-                    // 绘制每个格子的矩形
+
                     float left = j * (getWidth() / targetWidth);
                     float top = i * (getHeight() / targetHeight);
                     float right = left + (getWidth() / targetWidth);
@@ -126,46 +112,68 @@ public class HeatmapView extends View {
                     canvas.drawRect(left, top, right, bottom, paint);
                 }
             }
+
+            int centerX = targetWidth / 2;
+            int centerY = targetHeight / 2;
+
+            float centerTemp = interpolatedMatrix[centerY][centerX];
+            int centerColor = ColorManager.getColor(context, centerTemp, maxTemp, minTemp);
+            int invertedColor = invertColor(centerColor);
+
+            paint.setColor(invertedColor);
+            paint.setStrokeWidth(8);
+            float lineLength = 45;
+            canvas.drawLine(centerX * (getWidth() / targetWidth) - lineLength, centerY * (getHeight() / targetHeight),
+                    centerX * (getWidth() / targetWidth) + lineLength, centerY * (getHeight() / targetHeight), paint);
+            canvas.drawLine(centerX * (getWidth() / targetWidth), centerY * (getHeight() / targetHeight) - lineLength,
+                    centerX * (getWidth() / targetWidth), centerY * (getHeight() / targetHeight) + lineLength, paint);
+
+            float tempAtPointer = interpolatedMatrix[centerY + 1][centerX + 1];
+            int tempColor = ColorManager.getColor(context, tempAtPointer, maxTemp, minTemp);
+            int invertedTempColor = invertColor(tempColor);
+
+            paint.setColor(invertedTempColor);
+            paint.setTextSize(60);
+            String tempText = Math.round(tempAtPointer) + "℃";
+            float textX = (centerX + 1) * (getWidth() / targetWidth) + 60;
+            float textY = (centerY + 1) * (getHeight() / targetHeight) + 60;
+            canvas.drawText(tempText, textX, textY, paint);
         }
     }
 
-    // 矩阵旋转方法
     private float[][] rotateMatrix(float[][] matrix, int rotation) {
         int rows = matrix.length;
         int cols = matrix[0].length;
-        float[][] rotatedMatrix;
+        float[][] rotated = new float[cols][rows];
 
         switch (rotation) {
-            case 1: // 90度
-                rotatedMatrix = new float[cols][rows];
+            case 0:
+                return matrix;
+            case 1:
                 for (int i = 0; i < rows; i++) {
                     for (int j = 0; j < cols; j++) {
-                        rotatedMatrix[j][rows - 1 - i] = matrix[i][j];
+                        rotated[j][rows - 1 - i] = matrix[i][j];
                     }
                 }
                 break;
-            case 2: // 180度
-                rotatedMatrix = new float[rows][cols];
+            case 2:
                 for (int i = 0; i < rows; i++) {
                     for (int j = 0; j < cols; j++) {
-                        rotatedMatrix[rows - 1 - i][cols - 1 - j] = matrix[i][j];
+                        rotated[rows - 1 - i][cols - 1 - j] = matrix[i][j];
                     }
                 }
                 break;
-            case 3: // 270度
-                rotatedMatrix = new float[cols][rows];
+            case 3:
                 for (int i = 0; i < rows; i++) {
                     for (int j = 0; j < cols; j++) {
-                        rotatedMatrix[cols - 1 - j][i] = matrix[i][j];
+                        rotated[cols - 1 - j][i] = matrix[i][j];
                     }
                 }
-                break;
-            default: // 0度，不旋转
-                rotatedMatrix = matrix;
                 break;
         }
-        return rotatedMatrix;
+        return rotated;
     }
+
 
     // 按照插值因子，对前后两帧进行插值
     private float[][] interpolateFrames(float[][] previous, float[][] current) {

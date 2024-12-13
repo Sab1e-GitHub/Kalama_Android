@@ -147,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
             sw_cameraAssistMode.setChecked(false);
         }
         sb_thermographAlpha.setProgress((int) (userConfiguration.getThermographAlpha() * 100));
-
+        heatmapView.setAlpha(userConfiguration.getThermographAlpha());
 
         // 检查相机权限
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
